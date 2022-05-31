@@ -110,18 +110,9 @@ class Simulator(Config):
         # download terrain layers from USGS's 3DEP dataset
         self.region = Terrain(self.lonlat_bounds, self.data_dir)
         try:
-            if self.slopeAspectMode == 'download':
-                self.terrain_layers = {
-                    'Elevation': 'DEM',
-                    'Slope': 'Slope Degrees',
-                    'Aspect': 'Aspect Degrees'
-                }
-            elif self.slopeAspectMode == 'compute':
-                self.terrain_layers = {
-                    'Elevation': 'DEM',
-                }
-            else:
-                raise ValueError ('Mode can only be compute or download')
+            self.terrain_layers = {
+                'Elevation': 'DEM',
+            }
 
             self.region.download(self.terrain_layers.values())
         except Exception as _:
@@ -205,55 +196,27 @@ class Simulator(Config):
 
     def get_terrain_slope(self):
         """ Returns data for terrain layer inprojected crs """
-        if self.slopeAspectMode == 'download':
-            try:
-                slope = self.get_terrain_layer('Slope')
-                fname = self._get_terrain_quantity_fname(self.case_ids[0],'slope', self.mode_data_dir)
-                if not os.path.isfile(f'{fname}.npy'):
-                    np.save(f'{fname}.npy', slope.astype(np.float32))
-            except OSError:
-                elev = self.get_terrain_elevation()
-                slope = compute_slope_degrees(elev, self.resolution)
-            return slope
-
-        elif self.slopeAspectMode == 'compute':
-            try:
-                slopefname_str = 'slope'
-                if self.orographic_model.lower() != 'original':
-                    slopefname_str += f'_blur{int(self.h)}m'
-                slope = self.load_terrain_quantity(self.case_ids[0], slopefname_str)
-                print(f'Found slope map. Loading it..')
-            except OSError:
-                slope = self.compute_slope_degrees_case()
-            return slope
-        else:
-            raise ValueError ('Mode can only be compute or download')
+        try:
+            slopefname_str = 'slope'
+            if self.orographic_model.lower() != 'original':
+                slopefname_str += f'_blur{int(self.h)}m'
+            slope = self.load_terrain_quantity(self.case_ids[0], slopefname_str)
+            print(f'Found slope map. Loading it..')
+        except OSError:
+            slope = self.compute_slope_degrees_case()
+        return slope
 
     def get_terrain_aspect(self):
         """ Returns data for terrain layer inprojected crs """
-        if self.slopeAspectMode == 'download':
-            try:
-                aspect = self.get_terrain_layer('Aspect')
-                fname = self._get_terrain_quantity_fname(self.case_ids[0],'aspect', self.mode_data_dir)
-                if not os.path.isfile(f'{fname}.npy'):
-                    np.save(f'{fname}.npy', aspect.astype(np.float32))
-            except OSError:
-                elev = self.get_terrain_elevation()
-                aspect = compute_aspect_degrees(elev, self.resolution)
-            return aspect
-
-        elif self.slopeAspectMode == 'compute':
-            try:
-                aspectfname_str = 'aspect'
-                if self.orographic_model.lower() != 'original':
-                    aspectfname_str += f'_blur{int(self.h)}m'
-                aspect = self.load_terrain_quantity(self.case_ids[0], aspectfname_str)
-                print(f'Found aspect map. Loading it..')
-            except OSError:
-                aspect = self.compute_aspect_degrees_case()
-            return aspect
-        else:
-            raise ValueError ('Mode can only compute or download')
+        try:
+            aspectfname_str = 'aspect'
+            if self.orographic_model.lower() != 'original':
+                aspectfname_str += f'_blur{int(self.h)}m'
+            aspect = self.load_terrain_quantity(self.case_ids[0], aspectfname_str)
+            print(f'Found aspect map. Loading it..')
+        except OSError:
+            aspect = self.compute_aspect_degrees_case()
+        return aspect
 
 
     def get_terrain_sx(self):
@@ -261,6 +224,7 @@ class Simulator(Config):
         try:
             sxfname_str = f'sx_d{int(self.uniform_winddirn_href)}'
             sx = self.load_terrain_quantity(self.case_ids[0], sxfname_str)
+            print(f'Found sx map for {int(self.unifor_winddirn_href)} deg. Loading it..')
         except OSError:
             sx = self.compute_sx_case() 
         return sx

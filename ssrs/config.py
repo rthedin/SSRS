@@ -69,9 +69,6 @@ class Config:
     uniform_windspeed_href : float = 10.              # windspeed at ref height
     uniform_winddirn_href : float = uniform_winddirn  # wind dir at ref height (for generality)
 
-    # Option for slope and aspect
-    slopeAspectMode: str = 'compute'                # 'download' or 'compute'
-
     # parameters for simulating tracks
     track_direction: float = 0  # movement direction measured clockwise from north
     track_count: str = 1000  # number of simulated eagle tracks
