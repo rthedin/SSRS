@@ -93,6 +93,10 @@ class Simulator(Config):
         self.lonlat_bounds = transform_bounds(
             self.bounds, self.projected_crs, self.lonlat_crs)
 
+        # get meshgrid for pcolormesh plotting
+        xgrid, ygrid = self.get_terrain_grid()
+        self.xx, self.yy = np.meshgrid(xgrid, ygrid, indexing='ij')
+
         # download terrain layers from USGS's 3DEP dataset
         self.region = Terrain(self.lonlat_bounds, self.data_dir)
         try:
@@ -682,8 +686,8 @@ class Simulator(Config):
 
 ########### Plot updrafts and WTK layers ###########
 
-    def plot_updrafts(self, apply_threshold=True,
-                      plot_turbs=True, show=False) -> None:
+    def plot_updrafts(self, apply_threshold=True, plot_turbs=True,
+                      show=False, plot='imshow', figsize=None) -> None:
         """ Plot updrafts with or without applying the threshold """
         print('Plotting updraft fields..')
         for case_id in self.case_ids:
@@ -691,9 +695,12 @@ class Simulator(Config):
             for real_id, updraft in enumerate(updrafts):
                 fig, axs = plt.subplots(figsize=self.fig_size)
                 maxval = min(max(1, int(round(np.mean(updraft)))), 5)
-                curm = axs.imshow(updraft, cmap='viridis',
-                                  extent=self.extent, origin='lower',
-                                  vmin=0, vmax=maxval)
+                if plot == 'pcolormesh':
+                    curm = axs.pcolormesh(self.xx, self.yy, updraft.T,
+                                          cmap='viridis', rasterized=True, vmin=0, vmax=maxval)
+                else:
+                    curm = axs.imshow(updraft, cmap='viridis', extent=self.extent,
+                                      origin='lower', vmin=0, vmax=maxval)
                 cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
                 if real_id == 0:
                     lbl = 'Orographic updraft (m/s)'
@@ -724,23 +731,23 @@ class Simulator(Config):
             fname = os.path.join(self.mode_fig_dir, f'{case_id}_thermal.png')
             self.save_fig(fig, fname, show)
 
-    def plot_updrafts(self, plot_turbs=True, show=False) -> None:
-        """ Plot estimated thermal updrafts """
-        for case_id in self.case_ids:
-            orograph = np.load(self._get_orograph_fpath(case_id))
-            thermal = np.load(self._get_thermal_fpath(case_id))
-            sum = orograph + thermal
-            fig, axs = plt.subplots(figsize=self.fig_size)
-            maxval = min(max(5, int(round(np.mean(thermal)))), 5)
-            curm = axs.imshow(sum, cmap='viridis',
-                              extent=self.extent, origin='lower',
-                              vmin=0, vmax=maxval)
-            cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
-            cbar.set_label('Wo + Wt (m/s)')
-            if plot_turbs:
-                self.plot_turbine_locations(axs)
-            fname = os.path.join(self.mode_fig_dir, f'{case_id}_wtot.png')
-            self.save_fig(fig, fname, show)
+   # def plot_updrafts(self, plot_turbs=True, show=False) -> None:
+   #     """ Plot estimated thermal updrafts """
+   #     for case_id in self.case_ids:
+   #         orograph = np.load(self._get_orograph_fpath(case_id))
+   #         thermal = np.load(self._get_thermal_fpath(case_id))
+   #         sum = orograph + thermal
+   #         fig, axs = plt.subplots(figsize=self.fig_size)
+   #         maxval = min(max(5, int(round(np.mean(thermal)))), 5)
+   #         curm = axs.imshow(sum, cmap='viridis',
+   #                           extent=self.extent, origin='lower',
+   #                           vmin=0, vmax=maxval)
+   #         cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
+   #         cbar.set_label('Wo + Wt (m/s)')
+   #         if plot_turbs:
+   #             self.plot_turbine_locations(axs)
+   #         fname = os.path.join(self.mode_fig_dir, f'{case_id}_wtot.png')
+   #         self.save_fig(fig, fname, show)
 
     def plot_sm_orographic_updrafts(self, plot_turbs=True, show=False) -> None:
         """ Plot orographic updrafts """
