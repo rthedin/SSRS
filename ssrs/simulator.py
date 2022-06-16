@@ -283,17 +283,17 @@ class Simulator(Config):
             self.plot_turbine_locations(axs)
         self.save_fig(fig, os.path.join(self.fig_dir, 'elevation.png'), show)
 
-    def plot_terrain_slope(self, plot_turbs=True, show=False) -> None:
-        """ Plots slope in degrees """
-        slope = self.get_terrain_slope()
-        fig, axs = plt.subplots(figsize=self.fig_size)
-        curm = axs.imshow(slope, cmap='magma_r',
-                          extent=self.extent, origin='lower')
-        cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
-        cbar.set_label('Slope (deg)')
-        if plot_turbs:
-            self.plot_turbine_locations(axs)
-        self.save_fig(fig, os.path.join(self.fig_dir, 'slope.png'), show)
+    #def plot_terrain_slope(self, plot_turbs=True, show=False) -> None:
+    #    """ Plots slope in degrees """
+    #    slope = self.get_terrain_slope()
+    #    fig, axs = plt.subplots(figsize=self.fig_size)
+    #    curm = axs.imshow(slope, cmap='magma_r',
+    #                      extent=self.extent, origin='lower')
+    #    cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
+    #    cbar.set_label('Slope (deg)')
+    #    if plot_turbs:
+    #        self.plot_turbine_locations(axs)
+    #    self.save_fig(fig, os.path.join(self.fig_dir, 'slope.png'), show)
 
 #    def plot_terrain_aspect(self, plot_turbs=True, show=False) -> None:
 #        """ Plots terrain aspect """
@@ -1146,12 +1146,15 @@ class Simulator(Config):
                 self.fig_dir, 'elevation.png'), show)
         return fig, axs
 
-    def plot_terrain_slope(self, plot_turbs=True, show=False) -> None:
+    def plot_terrain_slope(self, plot_turbs=True, show=False, plot='imshow', figsize=None) -> None:
         """ Plots slope in degrees """
+        if figsize is None: figsize=self.fig_size
         slope = self.get_terrain_slope()
-        fig, axs = plt.subplots(figsize=self.fig_size)
-        curm = axs.imshow(slope, cmap='magma_r',
-                          extent=self.extent, origin='lower')
+        fig, axs = plt.subplots(figsize=figsize)
+        if plot == 'pcolormesh':
+            curm = axs.pcolormesh(self.xx, self.yy, slope.T, cmap='magma_r', rasterized=True)
+        else:
+            curm = axs.imshow(slope, cmap='magma_r', extent=self.extent, origin='lower')
         cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
         cbar.set_label('Slope (Degrees)')
         if plot_turbs:
