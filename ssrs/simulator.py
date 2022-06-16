@@ -295,17 +295,17 @@ class Simulator(Config):
             self.plot_turbine_locations(axs)
         self.save_fig(fig, os.path.join(self.fig_dir, 'slope.png'), show)
 
-    def plot_terrain_aspect(self, plot_turbs=True, show=False) -> None:
-        """ Plots terrain aspect """
-        aspect = self.get_terrain_aspect()
-        fig, axs = plt.subplots(figsize=self.fig_size)
-        curm = axs.imshow(aspect, cmap='hsv',
-                          extent=self.extent, origin='lower', vmin=0, vmax=360.)
-        cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
-        cbar.set_label('Aspect (deg)')
-        if plot_turbs:
-            self.plot_turbine_locations(axs)
-        self.save_fig(fig, os.path.join(self.fig_dir, 'aspect.png'), show)
+#    def plot_terrain_aspect(self, plot_turbs=True, show=False) -> None:
+#        """ Plots terrain aspect """
+#        aspect = self.get_terrain_aspect()
+#        fig, axs = plt.subplots(figsize=self.fig_size)
+#        curm = axs.imshow(aspect, cmap='hsv',
+#                          extent=self.extent, origin='lower', vmin=0, vmax=360.)
+#        cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
+#        cbar.set_label('Aspect (deg)')
+#        if plot_turbs:
+#            self.plot_turbine_locations(axs)
+#        self.save_fig(fig, os.path.join(self.fig_dir, 'aspect.png'), show)
 
     def plot_simulation_output(self, plot_turbs=True, show=False) -> None:
         """ Plots oro updraft and tracks """
@@ -1159,13 +1159,19 @@ class Simulator(Config):
         self.save_fig(fig, os.path.join(self.fig_dir, 'slope.png'), show)
         return fig, axs
 
-    def plot_terrain_aspect(self, plot_turbs=True, show=False) -> None:
+    def plot_terrain_aspect(self, plot_turbs=True, show=False, plot='imshow', cmap='twilight', figsize=None) -> None:
         """ Plots terrain aspect """
+        if figsize is None: figsize=self.fig_size
         aspect = self.get_terrain_aspect()
-        fig, axs = plt.subplots(figsize=self.fig_size)
-        curm = axs.imshow(aspect, cmap='hsv',
+        fig, axs = plt.subplots(figsize=figsize)
+        if plot == 'pcolormesh':
+            curm = axs.pcolormesh(self.xx, self.yy, aspect.T, cmap=cmap, vmin=0, vmax=360, rasterized=True)
+        else:
+            curm = axs.imshow(aspect, cmap=cmap,
                           extent=self.extent, origin='lower', vmin=0, vmax=360.)
         cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
+        cbar.ax.set_yticks([0,45,90,135,180,225,270,315,360])
+        cbar.ax.set_yticklabels(['N','NE','E','SE','S','SW','W','NW','N'])
         cbar.set_label('Aspect (Degrees)')
         if plot_turbs:
             self.plot_turbine_locations(axs)
