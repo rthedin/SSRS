@@ -166,7 +166,7 @@ class Simulator(Config):
         try:
             slope = self.get_terrain_layer('Slope')
             print('dumping slope at try of get_terrain_slope')
-            np.save('slope_try_get_terrain_slope.npy',slope)
+            np.save(os.path.join(self.data_dir,'slope_try_get_terrain_slope.npy'),slope)
         except Exception as _:
             elev = self.get_terrain_elevation()
             slope = compute_slope_degrees(elev, self.resolution)
@@ -207,7 +207,14 @@ class Simulator(Config):
         aspect = self.get_terrain_aspect()
         wspeed = self.uniform_windspeed * np.ones(self.gridsize)
         wdirn = self.uniform_winddirn * np.ones(self.gridsize)
+        # save files here instead of layers.compute_orographic_updraft
+        print('Dumping wspd, wdir, slope and aspect as used by compute_orographic_updraft')
+        np.save(os.path.join(self.data_dir,'wspeed.npy'),wspeed)
+        np.save(os.path.join(self.data_dir,'wdirn.npy'),wdirn)
+        np.save(os.path.join(self.data_dir,'slope.npy'),slope)
+        np.save(os.path.join(self.data_dir,'aspect.npy'),aspect)
         orograph = compute_orographic_updraft(wspeed, wdirn, slope, aspect)
+        np.save(os.path.join(self.data_dir,'orograph.npy'),orograph)
         fname = self._get_orograph_fname(self.case_ids[0], self.mode_data_dir)
         np.save(f'{fname}.npy', orograph.astype(np.float32))
 

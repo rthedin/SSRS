@@ -18,10 +18,10 @@ def compute_orographic_updraft(
 ) -> np.ndarray:
     """ Returns orographic updraft using wind speed, wind direction, slope
     and aspect """
-    np.save('wspeed.npy',wspeed)
-    np.save('wdirn.npy',wdirn)
-    np.save('slope.npy',slope)
-    np.save('aspect.npy',aspect)
+    #np.save('wspeed.npy',wspeed)
+    #np.save('wdirn.npy',wdirn)
+    #np.save('slope.npy',slope)
+    #np.save('aspect.npy',aspect)
     aspect_diff = np.maximum(0., np.cos((aspect - wdirn) * np.pi / 180.))
     return np.maximum(min_updraft_val, np.multiply(wspeed, np.multiply(np.sin(
         slope * np.pi / 180.), aspect_diff)))
