@@ -20,15 +20,18 @@ def get_raster_in_projected_crs(
 
     # get the CRS object from projected crs
     proj_crs = get_rasterio_crs_object(proj_crs_string)
+    print(proj_crs)
     assert proj_crs.is_projected, f'{proj_crs_string} is not a projected crs!'
     check_if_raster_file_exists(fpath)
 
     # Compute the Affine transform in projected crs
     proj_dx = proj_res if isinstance(proj_res, float) else proj_res[0]
     proj_dy = proj_res if isinstance(proj_res, float) else proj_res[1]
+    print(proj_dx,proj_dy)
     assert (proj_dx > 0. and proj_dy > 0.), f'{proj_res} invalid resolution!'
     proj_transform = rs.transform.from_origin(
         proj_bounds[0], proj_bounds[3], proj_dx, proj_dy)
+    print(proj_transform)
 
     # reproject the data into projeted crs
     resampling_method = rs.warp.Resampling.bilinear

@@ -165,6 +165,8 @@ class Simulator(Config):
         """ Returns data for terrain layer inprojected crs """
         try:
             slope = self.get_terrain_layer('Slope')
+            print('dumping slope at try of get_terrain_slope')
+            np.save('slope_try_get_terrain_slope.npy',slope)
         except Exception as _:
             elev = self.get_terrain_elevation()
             slope = compute_slope_degrees(elev, self.resolution)
