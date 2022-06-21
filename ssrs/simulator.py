@@ -159,7 +159,11 @@ class Simulator(Config):
 
     def get_terrain_elevation(self):
         """ Returns data for terrain layer inprojected crs """
-        return self.get_terrain_layer('Elevation')
+        elev =  self.get_terrain_layer('Elevation')
+        fname = 'elev'
+        if not os.path.isfile(os.path.join(self.data_dir,f'{fname}.npy')):
+            np.save(os.path.join(self.data_dir,f'{fname}.npy'), elev.astype(np.float32))
+        return elev
 
     def get_terrain_slope(self):
         """ Returns data for terrain layer inprojected crs """
@@ -280,17 +284,17 @@ class Simulator(Config):
         """ Returns file path for saving orographic updrafts data """
         return os.path.join(dirname, f'{case_id}_orograph')
 
-    def plot_terrain_elevation(self, plot_turbs=True, show=False) -> None:
-        """ Plotting terrain elevation """
-        elevation = self.get_terrain_elevation()
-        fig, axs = plt.subplots(figsize=self.fig_size)
-        curm = axs.imshow(elevation, cmap='terrain',
-                          extent=self.extent, origin='lower')
-        cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
-        cbar.set_label('Elevation (m)')
-        if plot_turbs:
-            self.plot_turbine_locations(axs)
-        self.save_fig(fig, os.path.join(self.fig_dir, 'elevation.png'), show)
+    #def plot_terrain_elevation(self, plot_turbs=True, show=False) -> None:
+    #    """ Plotting terrain elevation """
+    #    elevation = self.get_terrain_elevation()
+    #    fig, axs = plt.subplots(figsize=self.fig_size)
+    #    curm = axs.imshow(elevation, cmap='terrain',
+    #                      extent=self.extent, origin='lower')
+    #    cbar, _ = create_gis_axis(fig, axs, curm, self.km_bar)
+    #    cbar.set_label('Elevation (m)')
+    #    if plot_turbs:
+    #        self.plot_turbine_locations(axs)
+    #    self.save_fig(fig, os.path.join(self.fig_dir, 'elevation.png'), show)
 
     #def plot_terrain_slope(self, plot_turbs=True, show=False) -> None:
     #    """ Plots slope in degrees """
